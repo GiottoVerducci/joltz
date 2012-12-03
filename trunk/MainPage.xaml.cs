@@ -50,9 +50,10 @@ namespace JOLTZ
             _playerAvailabilities.Add(new PlayerAvailability("Preston, GMT-6, 09:00-17:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Dorrinal, GMT-8, 09:00-17:00, 20:00-21:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Juggernaut1981, GMT+10, 16:00-19:00, 21:00-23:00"));
-            _playerAvailabilities.Add(new PlayerAvailability("James D Burns, GMT-5,19:00-23:00"));
+            _playerAvailabilities.Add(new PlayerAvailability("jamesdburns, GMT-5,19:00-23:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Colin, GMT-5,09:00-16:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Blooded, GMT+1,11:00-16:00"));
+            _playerAvailabilities.Add(new PlayerAvailability("Jhattara, GMT+2,10:00-16:00, 17:00-20:00")); // weelends 14:00-20:00
              
             _playerAvailabilities = _playerAvailabilities.OrderBy(availability =>
                 {
