@@ -18,7 +18,9 @@ namespace JOLTZ
     {
         private readonly List<PlayerAvailability> _playerAvailabilities = new List<PlayerAvailability>();
         private readonly SolidColorBrush _fillBrush = new SolidColorBrush();
+        private readonly SolidColorBrush _uncertainFillBrush = new SolidColorBrush();
         private readonly SolidColorBrush _highlightFillBrush = new SolidColorBrush();
+        private readonly SolidColorBrush _highlightUncertainFillBrush = new SolidColorBrush();
         private readonly SolidColorBrush _highlightStrokeBrush = new SolidColorBrush();
         private readonly SolidColorBrush _whiteBrush = new SolidColorBrush();
         private readonly SolidColorBrush _nowBrush = new SolidColorBrush();
@@ -26,8 +28,9 @@ namespace JOLTZ
         public MainPage()
         {
             InitializeComponent();
-
             _fillBrush.Color = Color.FromArgb(128, 128, 128, 128);
+            _uncertainFillBrush.Color = Color.FromArgb(64, 128, 128, 128);
+            _highlightUncertainFillBrush.Color = Color.FromArgb(64, 0, 200, 0);
             _highlightFillBrush.Color = Color.FromArgb(192, 0, 200, 0);
             _highlightStrokeBrush.Color = Color.FromArgb(240, 0, 200, 0);
             _whiteBrush.Color = Color.FromArgb(255, 192, 192, 192);
@@ -49,12 +52,13 @@ namespace JOLTZ
             _playerAvailabilities.Add(new PlayerAvailability("Omelet, GMT-5, 09:00-17:00, 19:00-23:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Preston, GMT-6, 09:00-17:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Dorrinal, GMT-8, 09:00-17:00, 20:00-21:00"));
-            _playerAvailabilities.Add(new PlayerAvailability("Juggernaut1981, GMT+10, 16:00-19:00, 21:00-23:00"));
+            _playerAvailabilities.Add(new PlayerAvailability("Juggernaut1981, GMT+10, u10:00:16:00, 16:00-19:00, 21:00-23:00"));
             _playerAvailabilities.Add(new PlayerAvailability("jamesdburns, GMT-5,19:00-23:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Colin, GMT-5,09:00-16:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Blooded, GMT+1,11:00-16:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Jhattara, GMT+2,10:00-16:00, 17:00-20:00")); // weekends 14:00-20:00
             _playerAvailabilities.Add(new PlayerAvailability("Brien Croteau, GMT-8,18:00-21:00"));
+            _playerAvailabilities.Add(new PlayerAvailability("Cooper, GMT+1,u10:00-21:00"));
              
             _playerAvailabilities = _playerAvailabilities.OrderBy(availability =>
                 {
@@ -145,27 +149,29 @@ namespace JOLTZ
             {
                 foreach (var availability in playerAvailability.Availabilities)
                 {
-                    var toolTipText = string.Format("GMT{0}: {1}-{2}",
+                    var toolTipText = string.Format("GMT{0}: {1}-{2}{3}",
                         playerAvailability.GmtOffset.ToString("+#;-#"),
                         availability.UtcStartTime.TimeOfDay + new TimeSpan(playerAvailability.GmtOffset, 0, 0),
-                        availability.UtcEndTime.TimeOfDay + new TimeSpan(playerAvailability.GmtOffset, 0, 0));
+                        availability.UtcEndTime.TimeOfDay + new TimeSpan(playerAvailability.GmtOffset, 0, 0),
+                        availability.IsUncertain ? " (uncertain)" : null);
                     var rectLeftX = TimeToX(availability.UtcStartTime.ToLocalTime());
                     var rectRightX = TimeToX(availability.UtcEndTime.ToLocalTime());
+                    var isUncertain = availability.IsUncertain;
                     if (rectLeftX < rectRightX)
                     {
-                        AddRectangle(rectRightX - rectLeftX, height, rectLeftX, y + YOffset, availability.Contains(_currentTime), playerAvailability.Name, toolTipText, HorizontalAlignment.Center);
+                        AddRectangle(rectRightX - rectLeftX, height, rectLeftX, y + YOffset, availability.Contains(_currentTime), playerAvailability.Name, toolTipText, HorizontalAlignment.Center, isUncertain);
                     }
                     else
                     {
-                        AddRectangle(rectLeftX - rectRightX, height, rectLeftX, y + YOffset, availability.Contains(_currentTime), playerAvailability.Name, toolTipText, HorizontalAlignment.Left);
-                        AddRectangle(rectLeftX - rectRightX, height, 2 * rectRightX - rectLeftX, y + YOffset, availability.Contains(_currentTime), playerAvailability.Name, toolTipText, HorizontalAlignment.Right);
+                        AddRectangle(rectLeftX - rectRightX, height, rectLeftX, y + YOffset, availability.Contains(_currentTime), playerAvailability.Name, toolTipText, HorizontalAlignment.Left, isUncertain);
+                        AddRectangle(rectLeftX - rectRightX, height, 2 * rectRightX - rectLeftX, y + YOffset, availability.Contains(_currentTime), playerAvailability.Name, toolTipText, HorizontalAlignment.Right, isUncertain);
                     }
                 }
                 y += height;
             }
         }
 
-        private void AddRectangle(double width, double height, double left, double top, bool isHighlighted, string text, string toolTipText, HorizontalAlignment horizontalAlignment)
+        private void AddRectangle(double width, double height, double left, double top, bool isHighlighted, string text, string toolTipText, HorizontalAlignment horizontalAlignment, bool isUncertain)
         {
             var grid = new Grid
             {
@@ -180,10 +186,18 @@ namespace JOLTZ
                 Stroke = isHighlighted ? _highlightStrokeBrush : _whiteBrush
             };
 
+            if (isUncertain)
+            {
+                rectangle.Fill = isHighlighted ? _highlightUncertainFillBrush : _uncertainFillBrush;
+                rectangle.Stroke = null; 
+            }
+
             grid.Children.Add(rectangle);
 
             var viewbox = new Viewbox { Width = width, Height = height, MaxHeight = 15, HorizontalAlignment = horizontalAlignment, StretchDirection = StretchDirection.DownOnly, Stretch = Stretch.Fill };
             var textBlock = new TextBlock { Text = text, FontSize = 10, Foreground = _whiteBrush, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0, 10, 0) };
+            if (isUncertain)
+                textBlock.Opacity = 0.7f;
 
             viewbox.Child = textBlock;
 
@@ -201,6 +215,8 @@ namespace JOLTZ
                                         VerticalAlignment=""Top"" />");
 
             path.Fill = _pathFillBrush;
+            if (isUncertain)
+                path.Opacity = 0.3f;
             grid.Children.Add(path);
 
             grid.SetValue(Canvas.LeftProperty, left);
