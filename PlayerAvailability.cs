@@ -29,17 +29,20 @@ namespace JOLTZ
                 bool isUncertain = items[i][0] == 'u';
                 if (isUncertain)
                     items[i] = items[i].Substring(1);
+                bool isWeekEnd = items[i].StartsWith("we");
+                if(isWeekEnd)
+                    items[i] = items[i].Substring(2);
                 var ranges = items[i].Split('-', ':');
-                AddAvailability(Convert.ToInt32(ranges[0]), Convert.ToInt32(ranges[1]), Convert.ToInt32(ranges[2]), Convert.ToInt32(ranges[3]), isUncertain);
+                AddAvailability(Convert.ToInt32(ranges[0]), Convert.ToInt32(ranges[1]), Convert.ToInt32(ranges[2]), Convert.ToInt32(ranges[3]), isUncertain, isWeekEnd);
             }
         }
 
-        private void AddAvailability(int startHour, int startMinute, int endHour, int endMinute, bool isUncertain)
+        private void AddAvailability(int startHour, int startMinute, int endHour, int endMinute, bool isUncertain, bool isWeekEnd)
         {
             Availabilities.Add(new Availability(
                 new DateTime(2012, 1, 1, GetUtcHour(startHour), startMinute, 0, 0, DateTimeKind.Utc),
                 new DateTime(2012, 1, 1, GetUtcHour(endHour), endMinute, 0, 0, DateTimeKind.Utc),
-                isUncertain));
+                isUncertain, isWeekEnd));
         }
 
         public int GetUtcHour(int hour)
@@ -51,6 +54,5 @@ namespace JOLTZ
                 hour -= 24;
             return hour;
         }
-
     }
 }
