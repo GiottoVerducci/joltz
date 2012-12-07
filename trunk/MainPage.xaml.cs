@@ -56,10 +56,10 @@ namespace JOLTZ
             _playerAvailabilities.Add(new PlayerAvailability("jamesdburns, GMT-5,19:00-23:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Colin, GMT-5,09:00-16:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Blooded, GMT+1,11:00-16:00"));
-            _playerAvailabilities.Add(new PlayerAvailability("Jhattara, GMT+2,10:00-16:00, 17:00-20:00")); // weekends 14:00-20:00
+            _playerAvailabilities.Add(new PlayerAvailability("Jhattara, GMT+2,10:00-16:00, 17:00-20:00, we14:00-20:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Brien Croteau, GMT-8,18:00-21:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Cooper, GMT+1,u10:00-21:00"));
-             
+            _playerAvailabilities.Add(new PlayerAvailability("XZealot, GMT-6,07:00-16:00"));
             _playerAvailabilities = _playerAvailabilities.OrderBy(availability =>
                 {
                     var diff = Math.Abs(availability.GmtOffset - TimeZoneInfo.Local.BaseUtcOffset.Hours);
@@ -147,7 +147,9 @@ namespace JOLTZ
             double y = 0;
             foreach (var playerAvailability in _playerAvailabilities)
             {
-                foreach (var availability in playerAvailability.Availabilities)
+                bool hasWeekEndAvailabilities = playerAvailability.Availabilities.Any(a => a.IsWeekEnd);
+                bool isWeekEnd = hasWeekEndAvailabilities && IsWeekEnd(DateTime.UtcNow + new TimeSpan(playerAvailability.GmtOffset, 0, 0));
+                foreach (var availability in playerAvailability.Availabilities.Where(a => !hasWeekEndAvailabilities || a.IsWeekEnd == isWeekEnd))
                 {
                     var toolTipText = string.Format("GMT{0}: {1}-{2}{3}",
                         playerAvailability.GmtOffset.ToString("+#;-#"),
@@ -169,6 +171,12 @@ namespace JOLTZ
                 }
                 y += height;
             }
+        }
+
+        public bool IsWeekEnd(DateTime date)
+        {
+            var dayOfWeek = date.DayOfWeek;
+            return dayOfWeek == DayOfWeek.Saturday || dayOfWeek == DayOfWeek.Sunday;
         }
 
         private void AddRectangle(double width, double height, double left, double top, bool isHighlighted, string text, string toolTipText, HorizontalAlignment horizontalAlignment, bool isUncertain)
