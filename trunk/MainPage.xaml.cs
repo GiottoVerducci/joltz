@@ -60,6 +60,7 @@ namespace JOLTZ
             _playerAvailabilities.Add(new PlayerAvailability("Brien Croteau, GMT-8,18:00-21:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Cooper, GMT+1,u10:00-21:00"));
             _playerAvailabilities.Add(new PlayerAvailability("XZealot, GMT-6,07:00-16:00"));
+            _playerAvailabilities.Add(new PlayerAvailability("Dreegar, GMT+1,u08:00-22:00"));
             _playerAvailabilities = _playerAvailabilities.OrderBy(availability =>
                 {
                     var diff = Math.Abs(availability.GmtOffset - TimeZoneInfo.Local.BaseUtcOffset.Hours);
