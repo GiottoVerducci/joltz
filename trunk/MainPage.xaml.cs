@@ -47,7 +47,7 @@ namespace JOLTZ
                 }
             };
 
-            _playerAvailabilities.Add(new PlayerAvailability("Ankha, GMT+1, 10:00-12:00, 13:00-18:00"));
+            _playerAvailabilities.Add(new PlayerAvailability("Ankha, GMT+1, 10:00-12:00, 13:00-18:00, we10:00-10:30, we21:00-21:30"));
             _playerAvailabilities.Add(new PlayerAvailability("Klaital, GMT+2, 10:00-18:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Omelet, GMT-5, 09:00-17:00, 19:00-23:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Preston, GMT-6, 09:00-17:00"));
@@ -63,6 +63,8 @@ namespace JOLTZ
             _playerAvailabilities.Add(new PlayerAvailability("Dreegar, GMT+1,u08:00-22:00"));
             _playerAvailabilities.Add(new PlayerAvailability("IC-Oddish, GMT+3,11:00-17:00"));
             _playerAvailabilities.Add(new PlayerAvailability("Robba Yaga, GMT-5,11:00-17:00"));
+            _playerAvailabilities.Add(new PlayerAvailability("ShaneS, GMT+7,10:00-18:00"));
+
             _playerAvailabilities = _playerAvailabilities.OrderBy(availability =>
                 {
                     var diff = Math.Abs(availability.GmtOffset - TimeZoneInfo.Local.BaseUtcOffset.Hours);
