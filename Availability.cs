@@ -25,5 +25,21 @@ namespace JOLTZ
                 return start <= currentTime || currentTime <= end;
             return start <= currentTime && currentTime <= end;
         }
+
+        public bool Overlaps(Availability other)
+        {
+            return IsBetween(UtcStartTime.TimeOfDay, other.UtcStartTime.TimeOfDay, other.UtcEndTime.TimeOfDay)
+                || IsBetween(UtcEndTime.TimeOfDay, other.UtcStartTime.TimeOfDay, other.UtcEndTime.TimeOfDay)
+                || IsBetween(other.UtcStartTime.TimeOfDay, UtcStartTime.TimeOfDay, UtcEndTime.TimeOfDay)
+                || IsBetween(other.UtcEndTime.TimeOfDay, UtcStartTime.TimeOfDay, UtcEndTime.TimeOfDay);
+        }
+
+        private bool IsBetween(TimeSpan time, TimeSpan start, TimeSpan end)
+        {
+            if (start <= end)
+                return time >= start && time <= end;
+            return time >= start || time <= end; //eg. 23:00 - 6:00
+        }
+
     }
 }
