@@ -155,23 +155,32 @@ namespace JOLTZ
                 var realPlayerAvailabilities = _realPlayerAvailabilities.FirstOrDefault(pa => pa.Name == playerAvailability.Name);
                 if (realPlayerAvailabilities != null)
                 {
-                    var availabilities = realPlayerAvailabilities.Availabilities.Where(a => !hasWeekEndAvailabilities || a.IsWeekEnd == isWeekEnd).ToList();
+                    var detailDelay = 30;
+                    var availabilities = isWeekEnd ? realPlayerAvailabilities.WePresence : realPlayerAvailabilities.Presence; //realPlayerAvailabilities.Availabilities.Where(a => !hasWeekEndAvailabilities || a.IsWeekEnd == isWeekEnd).ToList();
                     var counts = new List<int>();
-                    for (int i = 0; i < 24; ++i)
+                    for (int i = 0; i < 24 * 60 / detailDelay; ++i)
                     {
-                        var timeSpan = new Availability(new DateTime(2012, 1, 1, i, 0, 0, DateTimeKind.Utc), new DateTime(2012, 1, 1, i, 59, 59, DateTimeKind.Utc), false, false);
-                        var count = availabilities.Count(timeSpan.Overlaps);
+                        var count = 0;
+                        for (int j = 0; j < detailDelay; ++j)
+                            count += availabilities[i * detailDelay + j];
+                        //var timeSpan = new Availability(new DateTime(2012, 1, 1, i, 0, 0, DateTimeKind.Utc), new DateTime(2012, 1, 1, i, 59, 59, DateTimeKind.Utc), false, false);
+                        //var count = availabilities.Count(timeSpan.Overlaps);
                         counts.Add(count);
                     }
                     var max = counts.Max();
 
-                    for (int i = 0; i < 24; ++i)
+                    for (int i = 0; i < 24 * 60 / detailDelay; ++i)
                     {
                         if (counts[i] == 0)
                             continue;
-                        var rectLeftX = TimeToX(new DateTime(2012, 1, 1, i, 0, 0, DateTimeKind.Utc).ToLocalTime());
-                        var rectRightX = TimeToX(new DateTime(2012, 1, 1, i, 59, 59, DateTimeKind.Utc).ToLocalTime());
-                        var intensity = counts[i] / (2d * max);
+                        var hours = i * detailDelay / 60;
+                        var minutes = i * detailDelay % 60;
+                        var nextHours = (-1 + (i + 1) * detailDelay) / 60;
+                        var nextMinutes = (-1 + (i + 1) * detailDelay) % 60;
+
+                        var rectLeftX = TimeToX(new DateTime(2012, 1, 1, hours, minutes, 0, DateTimeKind.Utc).ToLocalTime());
+                        var rectRightX = TimeToX(new DateTime(2012, 1, 1, nextHours, nextMinutes, 59, DateTimeKind.Utc).ToLocalTime());
+                        var intensity = counts[i] * counts[i] * counts[i] / (max * max * max * 2);
                         if (rectLeftX < rectRightX)
                         {
                             AddLightRectangle(rectRightX - rectLeftX, height, XOffset + rectLeftX, y + YOffset, intensity);
@@ -318,9 +327,9 @@ namespace JOLTZ
             var rectangle = new Rectangle
             {
                 Fill = _realFillBrush,
-                StrokeThickness = 1, // 0,
+                StrokeThickness = 0,
                 Width = width,
-                Height = height,
+                Height = height / 4,
                 Opacity = intensity
             };
 
@@ -330,7 +339,7 @@ namespace JOLTZ
             //grid.SetValue(Canvas.TopProperty, top + (height - 2) / 2);
             //Canvas.Children.Add(grid);
             rectangle.SetValue(Canvas.LeftProperty, left);
-            rectangle.SetValue(Canvas.TopProperty, top);
+            rectangle.SetValue(Canvas.TopProperty, top + (height - rectangle.Height) / 2);
             Canvas.Children.Add(rectangle);
         }
 
